@@ -6,9 +6,7 @@ require("hardhat-deploy");
 require("@nomiclabs/hardhat-ethers");
 const {
   privateKey,
-  mainnetUrl,
-  ropstenUrl,
-  rinkebyUrl,
+  infuraKey,
   etherscanApiKey,
   coinmarketCapKey,
 } = require("./secretsManager.js");
@@ -52,15 +50,15 @@ module.exports = {
   // uncomment this and run: yarn deploy-rinkeby
   networks: {
     rinkeby: {
-      url: rinkebyUrl,
+      url: `https://rinkeby.infura.io/v3/${infuraKey}`,
       accounts: [`0x${privateKey}`],
     },
     ropsten: {
-      url: ropstenUrl,
+      url: `https://ropsten.infura.io/v3/${infuraKey}`,
       accounts: [`0x${privateKey}`],
     },
     mainnet: {
-      url: mainnetUrl,
+      url: `https://mainnet.infura.io/v3/${infuraKey}`,
       accounts: [`0x${privateKey}`],
     },
   },

@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
 interface IStakingPool {
@@ -15,11 +14,9 @@ interface IStakingPool {
     function stopStaking(address _staker, uint256 _tokenId) external;
 }
 
-contract Penguins is ERC721Enumerable, Ownable, ERC721Burnable, Pausable {
+contract Penguins is ERC721Enumerable, Ownable, Pausable {
     using SafeMath for uint256;
-    using Counters for Counters.Counter;
 
-    Counters.Counter private _tokenIdTracker;
     IStakingPool private _pool;
 
     uint256 public constant MAX_ELEMENTS = 1000;
@@ -38,46 +35,41 @@ contract Penguins is ERC721Enumerable, Ownable, ERC721Burnable, Pausable {
         _pool = IStakingPool(_poolAddr);
     }
 
-    modifier saleIsOpen() {
-        require(_totalSupply() <= MAX_ELEMENTS, "Sale end");
+    modifier isPaused() {
         if (_msgSender() != owner()) {
             require(!paused(), "Pausable: paused");
         }
         _;
     }
 
-    function _totalSupply() internal view returns (uint256) {
-        return _tokenIdTracker.current();
-    }
-
-    function totalMint() public view returns (uint256) {
-        return _totalSupply();
-    }
-
     /**
      * @dev Mint the _amount of tokens
      * @param _amount is the token count
      */
-    function mint(address _to, uint256 _amount) public payable saleIsOpen {
-        uint256 total = _totalSupply();
+    function mint(uint256 _amount) public payable isPaused {
+        uint256 total = totalSupply();
+        require(totalSupply() < MAX_ELEMENTS, "Sale end");
         require(total + _amount <= MAX_ELEMENTS, "Max limit");
-        require(total <= MAX_ELEMENTS, "Sale end");
         require(msg.value >= price(_amount), "Value below price");
 
         for (uint256 i = 0; i < _amount; i++) {
-            _mintAnElement(_to);
+            uint256 id = totalSupply();
+            _safeMint(msg.sender, id);
+            emit CreatePenguin(id);
         }
-    }
-
-    function _mintAnElement(address _to) private {
-        uint256 id = _totalSupply();
-        _tokenIdTracker.increment();
-        _safeMint(_to, id);
-        emit CreatePenguin(id);
     }
 
     function price(uint256 _count) public pure returns (uint256) {
         return PRICE.mul(_count);
+    }
+
+    function burn(uint256 tokenId) public virtual isPaused {
+        //solhint-disable-next-line max-line-length
+        require(
+            _isApprovedOrOwner(_msgSender(), tokenId),
+            "ERC721Burnable: caller is not owner nor approved"
+        );
+        _burn(tokenId);
     }
 
     /**
@@ -126,7 +118,7 @@ contract Penguins is ERC721Enumerable, Ownable, ERC721Burnable, Pausable {
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override(ERC721, ERC721Enumerable) {
+    ) internal virtual override(ERC721Enumerable) {
         super._beforeTokenTransfer(from, to, tokenId);
         if (_msgSender() != owner()) {
             require(!paused(), "ERC721Pausable: token transfer while paused");
@@ -137,7 +129,7 @@ contract Penguins is ERC721Enumerable, Ownable, ERC721Burnable, Pausable {
         public
         view
         virtual
-        override(ERC721, ERC721Enumerable)
+        override(ERC721Enumerable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

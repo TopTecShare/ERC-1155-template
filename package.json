@@ -6,11 +6,9 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "coverage": "hardhat coverage",
-    "deploy-rinkeby": "hardhat deploy --network rinkeby",
-    "deploy-ropsten": "hardhat deploy --network ropsten",
+    "deploy:network": "hardhat deploy --network",
     "deploy": "hardhat deploy --network mainnet",
-    "verify-rinkeby": "npx hardhat verify --network rinkeby",
-    "verify-ropsten": "npx hardhat verify --network ropsten",
+    "verify:network": "npx hardhat verify --network",
     "verify": "npx hardhat verify --network mainnet"
   },
   "dependencies": {
