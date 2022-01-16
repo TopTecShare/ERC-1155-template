@@ -190,7 +190,7 @@ describe("Penguins", function () {
 
     it("Should fail transfer when paused if not owner", async function () {
       await expect(
-        await hardhatToken.mint(3, {
+        hardhatToken.mint(3, {
           value: utils.parseEther("0.75"),
         })
       )
@@ -208,7 +208,7 @@ describe("Penguins", function () {
 
     it("Should burn when paused if owner", async function () {
       await expect(
-        await hardhatToken.mint(3, {
+        hardhatToken.mint(3, {
           value: utils.parseEther("0.75"),
         })
       )
@@ -222,7 +222,7 @@ describe("Penguins", function () {
 
     it("Should mint when paused if owner", async function () {
       await expect(
-        await hardhatToken.mint(3, {
+        hardhatToken.mint(3, {
           value: utils.parseEther("0.75"),
         })
       )
@@ -234,7 +234,7 @@ describe("Penguins", function () {
 
     it("Should transfer when paused if owner", async function () {
       await expect(
-        await hardhatToken.mint(3, {
+        hardhatToken.mint(3, {
           value: utils.parseEther("0.75"),
         })
       )
@@ -248,7 +248,11 @@ describe("Penguins", function () {
   });
 
   describe("Staking", function () {
-    it("Should", async function () {});
+    it("Should set staking contract address by owner", async function () {
+      await expect(hardhatToken.setStakingPool(zeroAddress))
+        .to.emit(hardhatToken, "PoolAddrSet")
+        .withArgs(zeroAddress);
+    });
 
     xit("Should", async function () {});
 
@@ -257,7 +261,14 @@ describe("Penguins", function () {
 
   describe("Reveal", function () {
     it("Should reveal by owner", async function () {
-      await hardhatToken.setBaseURI('')
+      await hardhatToken.setBaseURI(
+        "https://gateway.pinata.cloud/ipfs/QmQsL8LG1ghPMEKeWx9nCj1NWUjEppRkuhyUcnoR4sTBo5/"
+      );
+
+      const baseTokenURI = await hardhatToken.baseTokenURI();
+      await expect(baseTokenURI).to.be.eql(
+        "https://gateway.pinata.cloud/ipfs/QmQsL8LG1ghPMEKeWx9nCj1NWUjEppRkuhyUcnoR4sTBo5/"
+      );
     });
   });
 });
