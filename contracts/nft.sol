@@ -32,11 +32,11 @@ contract Penguins is ERC721Enumerable, Ownable, Pausable {
         ERC721("Penguins", "PG")
     {
         setBaseURI(baseURI);
-        pause(true);
+        // pause(true);
         _pool = IStakingPool(_poolAddr);
     }
 
-    modifier isPaused() {
+    modifier notPaused() {
         if (_msgSender() != owner()) {
             require(!paused(), "Pausable: paused");
         }
@@ -47,7 +47,7 @@ contract Penguins is ERC721Enumerable, Ownable, Pausable {
      * @dev Mint the _amount of tokens
      * @param _amount is the token count
      */
-    function mint(uint256 _amount) public payable isPaused {
+    function mint(uint256 _amount) public payable notPaused {
         uint256 total = totalSupply();
         require(totalSupply() < MAX_ELEMENTS, "Sale end");
         require(total + _amount <= MAX_ELEMENTS, "Max limit");
@@ -64,7 +64,7 @@ contract Penguins is ERC721Enumerable, Ownable, Pausable {
         return PRICE.mul(_count);
     }
 
-    function burn(uint256 tokenId) public virtual isPaused {
+    function burn(uint256 tokenId) public virtual notPaused {
         //solhint-disable-next-line max-line-length
         require(
             _isApprovedOrOwner(_msgSender(), tokenId),

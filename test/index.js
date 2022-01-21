@@ -97,8 +97,8 @@ describe("Penguins", function () {
       const totalSupply = Number(await hardhatToken.totalSupply());
       expect(totalSupply).to.be.eql(1000);
 
-      const pause = await hardhatToken.paused();
-      expect(pause).to.be.eql(true);
+      // const pause = await hardhatToken.paused();
+      // expect(pause).to.be.eql(true);
 
       await expect(
         hardhatToken.mint(1, {
@@ -134,7 +134,6 @@ describe("Penguins", function () {
 
       await hardhatToken.approve(addr1.address, 1);
 
-      await hardhatToken.pause(false);
       await expect(hardhatToken.connect(addr1).burn(1))
         .to.emit(hardhatToken, "Transfer")
         .withArgs(owner.address, zeroAddress, 1);
@@ -165,6 +164,8 @@ describe("Penguins", function () {
 
   describe("Pause", function () {
     it("Should fail burn when paused if not owner", async function () {
+      await hardhatToken.pause(true);
+
       await expect(
         await hardhatToken.mint(3, {
           value: utils.parseEther("0.75"),
@@ -181,6 +182,8 @@ describe("Penguins", function () {
     });
 
     it("Should fail mint when paused if not owner", async function () {
+      await hardhatToken.pause(true);
+
       await expect(
         hardhatToken.connect(addr1).mint(3, {
           value: utils.parseEther("0.75"),
@@ -189,6 +192,8 @@ describe("Penguins", function () {
     });
 
     it("Should fail transfer when paused if not owner", async function () {
+      await hardhatToken.pause(true);
+
       await expect(
         hardhatToken.mint(3, {
           value: utils.parseEther("0.75"),
