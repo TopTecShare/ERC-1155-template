@@ -21,6 +21,7 @@ contract Penguins is ERC721Enumerable, Ownable, Pausable {
     IStakingPool private _pool;
 
     uint256 public constant MAX_ELEMENTS = 1000;
+    uint256 public constant MAX_PUBLIC_MINT = 20;
     uint256 public constant PRICE = 0.25 ether;
 
     string public baseTokenURI;
@@ -51,6 +52,11 @@ contract Penguins is ERC721Enumerable, Ownable, Pausable {
         uint256 total = totalSupply();
         require(totalSupply() < MAX_ELEMENTS, "Sale end");
         require(total + _amount <= MAX_ELEMENTS, "Max limit");
+        require(
+            _amount + balanceOf(msg.sender) <= MAX_PUBLIC_MINT ||
+                msg.sender == owner(),
+            "Exceeded max token purchase"
+        );
         require(msg.value >= price(_amount), "Value below price");
 
         for (uint256 i = 0; i < _amount; i++) {

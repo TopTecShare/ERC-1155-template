@@ -88,11 +88,20 @@ describe("Penguins", function () {
       ).to.be.revertedWith("Value below price");
     });
 
+    it("Should fail mint if exceed max token purchase", async function () {
+      await expect(
+        hardhatToken.connect(addr1).mint(21, {
+          value: utils.parseEther("5.25"),
+        })
+      ).to.be.revertedWith("Exceeded max token purchase");
+    });
+
     it("Should fail mint if sale ended", async function () {
-      for (let i = 0; i < 10; i++)
-        await hardhatToken.mint(100, {
-          value: utils.parseEther("25"),
+      for (let i = 0; i < 50; i++) {
+        await hardhatToken.mint(20, {
+          value: utils.parseEther("5"),
         });
+      }
 
       const totalSupply = Number(await hardhatToken.totalSupply());
       expect(totalSupply).to.be.eql(1000);
