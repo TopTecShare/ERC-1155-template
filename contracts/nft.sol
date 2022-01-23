@@ -1,117 +1,133 @@
+/**
+ *Submitted for verification at Etherscan.io on 2022-01-21
+ */
+
 // SPDX-License-Identifier: MIT
-// dev address is 0x67145faCE41F67E17210A12Ca093133B3ad69592
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
-interface IStakingPool {
-    function startStaking(address _staker, uint256 _tokenId) external;
+// Author: 0x67145faCE41F67E17210A12Ca093133B3ad69592
 
-    function stopStaking(address _staker, uint256 _tokenId) external;
-}
+contract DogeFace is ERC1155, Ownable {
+    string public constant name = "DogeFace";
+    string public constant symbol = "DOGE";
 
-contract Penguins is ERC721Enumerable, Ownable, Pausable {
-    using SafeMath for uint256;
+    uint32 public totalSupply = 0;
+    uint256 public constant unitPrice = 0.0777 ether;
 
-    IStakingPool private _pool;
+    uint32 public preSaleStart = 1638043200;
+    uint32 public constant preSaleMaxSupply = 1000;
 
-    uint256 public constant MAX_ELEMENTS = 1000;
-    uint256 public constant MAX_PUBLIC_MINT = 20;
-    uint256 public constant PRICE = 0.25 ether;
+    uint32 public publicSaleStart = 1638054000;
+    uint32 public constant publicSaleMaxSupply = 3333;
 
-    string public baseTokenURI;
+    address private signerAddress = 0xbc4f847004FA914F6Fe82BEa27A9dFBdbE295401;
 
-    event CreatePenguin(uint256 indexed id);
-    event PoolAddrSet(address addr);
+    constructor(string memory uri) ERC1155(uri) {}
 
-    constructor(string memory baseURI, address _poolAddr)
-        ERC721("Penguins", "PG")
-    {
-        setBaseURI(baseURI);
-        // pause(true);
-        _pool = IStakingPool(_poolAddr);
+    function setURI(string memory uri) public onlyOwner {
+        _setURI(uri);
     }
 
-    modifier notPaused() {
-        if (_msgSender() != owner()) {
-            require(!paused(), "Pausable: paused");
+    function setSignerAddress(address addr) external onlyOwner {
+        signerAddress = addr;
+    }
+
+    function setPreSaleStart(uint32 timestamp) public onlyOwner {
+        preSaleStart = timestamp;
+    }
+
+    function setPublicSaleStart(uint32 timestamp) public onlyOwner {
+        publicSaleStart = timestamp;
+    }
+
+    function preSaleIsActive() public view returns (bool) {
+        return
+            preSaleStart <= block.timestamp &&
+            publicSaleStart >= block.timestamp;
+    }
+
+    function publicSaleIsActive() public view returns (bool) {
+        return publicSaleStart <= block.timestamp;
+    }
+
+    function isValidAccessMessage(
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal view returns (bool) {
+        bytes32 hash = keccak256(abi.encodePacked(msg.sender));
+        return
+            signerAddress ==
+            ecrecover(
+                keccak256(
+                    abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
+                ),
+                v,
+                r,
+                s
+            );
+    }
+
+    function mint(address to, uint32 count) internal {
+        if (count > 1) {
+            uint256[] memory ids = new uint256[](uint256(count));
+            uint256[] memory amounts = new uint256[](uint256(count));
+
+            for (uint32 i = 0; i < count; i++) {
+                ids[i] = totalSupply + i;
+                amounts[i] = 1;
+            }
+
+            _mintBatch(to, ids, amounts, "");
+        } else {
+            _mint(to, totalSupply, 1, "");
         }
-        _;
+
+        totalSupply += count;
     }
 
-    /**
-     * @dev Mint the _amount of tokens
-     * @param _amount is the token count
-     */
-    function mint(uint256 _amount) public payable notPaused {
-        uint256 total = totalSupply();
-        require(totalSupply() < MAX_ELEMENTS, "Sale end");
-        require(total + _amount <= MAX_ELEMENTS, "Max limit");
+    function preSaleMint(
+        uint8 v,
+        bytes32 r,
+        bytes32 s,
+        uint32 count
+    ) external payable {
+        require(preSaleIsActive(), "Pre-sale is not active.");
+        require(isValidAccessMessage(v, r, s), "Not whitelisted.");
+        require(count > 0, "Count must be greater than 0.");
         require(
-            _amount + balanceOf(msg.sender) <= MAX_PUBLIC_MINT ||
-                msg.sender == owner(),
-            "Exceeded max token purchase"
+            totalSupply + count <= preSaleMaxSupply,
+            "Count exceeds the maximum allowed supply."
         );
-        require(msg.value >= price(_amount), "Value below price");
+        require(msg.value >= unitPrice * count, "Not enough ether.");
 
-        for (uint256 i = 0; i < _amount; i++) {
-            uint256 id = totalSupply();
-            _safeMint(msg.sender, id);
-            emit CreatePenguin(id);
-        }
+        mint(msg.sender, count);
     }
 
-    function price(uint256 _count) public pure returns (uint256) {
-        return PRICE.mul(_count);
-    }
-
-    function burn(uint256 tokenId) public virtual notPaused {
-        //solhint-disable-next-line max-line-length
+    function publicSaleMint(uint32 count) external payable {
+        require(publicSaleIsActive(), "Public sale is not active.");
+        require(count > 0, "Count must be greater than 0.");
         require(
-            _isApprovedOrOwner(_msgSender(), tokenId),
-            "ERC721Burnable: caller is not owner nor approved"
+            totalSupply + count <= publicSaleMaxSupply,
+            "Count exceeds the maximum allowed supply."
         );
-        _burn(tokenId);
+        require(msg.value >= unitPrice * count, "Not enough ether.");
+
+        mint(msg.sender, count);
     }
 
-    /**
-     * @dev set the _baseTokenURI
-     * @param baseURI of the _baseTokenURI
-     */
-    function setBaseURI(string memory baseURI) public onlyOwner {
-        baseTokenURI = baseURI;
-    }
+    function batchMint(address[] memory addresses) external onlyOwner {
+        require(
+            totalSupply + addresses.length <= publicSaleMaxSupply,
+            "Count exceeds the maximum allowed supply."
+        );
 
-    function _baseURI() internal view virtual override returns (string memory) {
-        return baseTokenURI;
-    }
-
-    function walletOfOwner(address _owner)
-        external
-        view
-        returns (uint256[] memory)
-    {
-        uint256 tokenCount = balanceOf(_owner);
-
-        uint256[] memory tokensId = new uint256[](tokenCount);
-        for (uint256 i = 0; i < tokenCount; i++) {
-            tokensId[i] = tokenOfOwnerByIndex(_owner, i);
+        for (uint256 i = 0; i < addresses.length; i++) {
+            mint(addresses[i], 1);
         }
-
-        return tokensId;
-    }
-
-    function pause(bool val) public onlyOwner {
-        if (val == true) {
-            _pause();
-            return;
-        }
-        _unpause();
     }
 
     function withdraw() public payable onlyOwner {
@@ -119,47 +135,5 @@ contract Penguins is ERC721Enumerable, Ownable, Pausable {
         require(balance > 0);
         (bool success, ) = msg.sender.call{value: balance}("");
         require(success, "Transfer failed.");
-    }
-
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override(ERC721Enumerable) {
-        super._beforeTokenTransfer(from, to, tokenId);
-        if (_msgSender() != owner()) {
-            require(!paused(), "ERC721Pausable: token transfer while paused");
-        }
-    }
-
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC721Enumerable)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
-    }
-
-    /*******************************************************************************
-     ***                            Staking Logic                                 ***
-     ******************************************************************************** */
-
-    function startStaking(uint256 _tokenId) external {
-        require(ownerOf(_tokenId) == msg.sender, "Staking: owner not matched");
-
-        _pool.startStaking(msg.sender, _tokenId);
-        _safeTransfer(msg.sender, address(_pool), _tokenId, "");
-    }
-
-    function stopStaking(uint256 _tokenId) external {
-        _pool.stopStaking(msg.sender, _tokenId);
-        _safeTransfer(address(_pool), msg.sender, _tokenId, "");
-    }
-
-    function setStakingPool(address _addr) external onlyOwner {
-        _pool = IStakingPool(_addr);
-        emit PoolAddrSet(_addr);
     }
 }
