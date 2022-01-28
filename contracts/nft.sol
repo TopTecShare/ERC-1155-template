@@ -8,7 +8,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
-// Author: 0x67145faCE41F67E17210A12Ca093133B3ad69592
+// Dev: 0x67145faCE41F67E17210A12Ca093133B3ad69592
 
 contract DogeFace is ERC1155, Ownable {
     string public constant name = "DogeFace";
