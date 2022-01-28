@@ -5,12 +5,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "./utils/Merkle.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 // Dev: 0x67145faCE41F67E17210A12Ca093133B3ad69592
 
-contract DogeFace is ERC1155, Ownable {
+contract DogeFace is ERC1155, Merkle {
     string public constant name = "DogeFace";
     string public constant symbol = "DOGE";
 
@@ -23,16 +23,14 @@ contract DogeFace is ERC1155, Ownable {
     uint32 public publicSaleStart = 1638054000;
     uint32 public constant publicSaleMaxSupply = 3333;
 
-    address private signerAddress = 0xbc4f847004FA914F6Fe82BEa27A9dFBdbE295401;
-
-    constructor(string memory uri) ERC1155(uri) {}
+    constructor(
+        bytes32 _whitelistRoot,
+        bytes32 _freeClaimRoot,
+        string memory uri
+    ) Merkle(_whitelistRoot, _freeClaimRoot) ERC1155(uri) {}
 
     function setURI(string memory uri) public onlyOwner {
         _setURI(uri);
-    }
-
-    function setSignerAddress(address addr) external onlyOwner {
-        signerAddress = addr;
     }
 
     function setPreSaleStart(uint32 timestamp) public onlyOwner {
@@ -53,24 +51,6 @@ contract DogeFace is ERC1155, Ownable {
         return publicSaleStart <= block.timestamp;
     }
 
-    function isValidAccessMessage(
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) internal view returns (bool) {
-        bytes32 hash = keccak256(abi.encodePacked(msg.sender));
-        return
-            signerAddress ==
-            ecrecover(
-                keccak256(
-                    abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
-                ),
-                v,
-                r,
-                s
-            );
-    }
-
     function mint(address to, uint32 count) internal {
         if (count > 1) {
             uint256[] memory ids = new uint256[](uint256(count));
@@ -89,19 +69,26 @@ contract DogeFace is ERC1155, Ownable {
         totalSupply += count;
     }
 
-    function preSaleMint(
-        uint8 v,
-        bytes32 r,
-        bytes32 s,
-        uint32 count
-    ) external payable {
+    function preSaleMint(uint32 count, bytes32[] calldata proof)
+        external
+        payable
+    {
         require(preSaleIsActive(), "Pre-sale is not active.");
-        require(isValidAccessMessage(v, r, s), "Not whitelisted.");
+        require(
+            _whitelistVerify(
+                _whitelistLeaf(
+                    msg.sender /*, tokenId*/
+                ),
+                proof
+            ),
+            "Invalid"
+        );
         require(count > 0, "Count must be greater than 0.");
         require(
             totalSupply + count <= preSaleMaxSupply,
             "Count exceeds the maximum allowed supply."
         );
+
         require(msg.value >= unitPrice * count, "Not enough ether.");
 
         mint(msg.sender, count);
