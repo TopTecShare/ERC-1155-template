@@ -1,6 +1,6 @@
 # ERC 1155 NFT Smart-Contract Template
 
-Use this contract for saving gas fees on Ethereum 10k PFP NFT launches. Batch-mint, batch-transfer, extensibility!
+Use this contract for saving gas fees on Ethereum 10k PFP NFT launches.
 
 ## Functions
 
@@ -8,6 +8,7 @@ Use this contract for saving gas fees on Ethereum 10k PFP NFT launches. Batch-mi
 * Presale
 * Change Base-URI (meta-reveal)
 * Batch Mint
+* Extensible: Create fungible tokens in the same contract (not included). 
 
 ## Development
 
