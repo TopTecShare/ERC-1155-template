@@ -11,17 +11,17 @@ import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 // Dev: 0x67145faCE41F67E17210A12Ca093133B3ad69592
 
 contract DogeFace is ERC1155, Merkle {
-    string public constant name = "DogeFace";
-    string public constant symbol = "DOGE";
+    string public constant name = "ShibeFace";
+    string public constant symbol = "SHIBE";
 
     uint32 public totalSupply = 0;
-    uint256 public constant unitPrice = 0.0777 ether;
+    uint256 public constant unitPrice = 0.13 ether;
 
     uint32 public preSaleStart = 1638043200;
-    uint32 public constant preSaleMaxSupply = 1000;
+    uint32 public constant preSaleMaxSupply = 111;
 
     uint32 public publicSaleStart = 1638054000;
-    uint32 public constant publicSaleMaxSupply = 3333;
+    uint32 public constant publicSaleMaxSupply = 333;
 
     constructor(
         bytes32 _whitelistRoot,
