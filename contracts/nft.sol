@@ -7,6 +7,7 @@ pragma solidity ^0.8.0;
 
 import "./utils/Merkle.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // Dev: 0x728aaa46815B8106b72EdD6E73feDF2233d3E29c
 
@@ -92,7 +93,7 @@ interface IERC20 {
     );
 }
 
-contract DogeFace is ERC1155, Merkle {
+contract DogeFace is ERC1155, Merkle, ReentrancyGuard {
     string public constant name = "DogeFace";
     string public constant symbol = "DOGE";
 
@@ -110,6 +111,8 @@ contract DogeFace is ERC1155, Merkle {
 
     uint256 public publicSaleStart = 1638054000;
     uint256 public constant publicSaleMaxSupply = 3333;
+
+    mapping(address => bool) whitelist;
 
     constructor(
         bytes32 _whitelistRoot,
@@ -157,8 +160,12 @@ contract DogeFace is ERC1155, Merkle {
         totalSupply += count;
     }
 
-    function preSaleMint(uint256 count, bytes32[] calldata proof) internal {
+    function preSaleMint(uint256 count, bytes32[] calldata proof)
+        internal
+        nonReentrant
+    {
         require(preSaleIsActive(), "Pre-sale is not active.");
+        require(!whitelist[msg.sender], "Already claimed.");
         require(
             _whitelistVerify(
                 _whitelistLeaf(
@@ -175,6 +182,7 @@ contract DogeFace is ERC1155, Merkle {
         );
 
         mint(msg.sender, count);
+        whitelist[msg.sender] = true;
     }
 
     function preSaleMintWithEth(uint256 count, bytes32[] calldata proof)
