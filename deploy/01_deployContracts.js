@@ -3,7 +3,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  await deploy("DogeFace", {
+  await deploy("ShibeFace", {
     from: deployer,
     log: true,
     args: [
@@ -11,4 +11,4 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     ],
   });
 };
-module.exports.tags = ["all", "DogeFace"];
+module.exports.tags = ["all", "ShibeFace"];

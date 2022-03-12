@@ -5,8 +5,8 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const DogeFace = await ethers.getContractFactory("DogeFace");
-  await DogeFace.deploy(
+  const ShibeFace = await ethers.getContractFactory("ShibeFace");
+  await ShibeFace.deploy(
     "https://ipfs.io/ipfs/QmQtN81i9eNrD3wxcr67scDpLvZDDXxbmAvNXMaZh3D6tB/",
   );
 }
