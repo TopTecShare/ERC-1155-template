@@ -8,20 +8,108 @@ pragma solidity ^0.8.0;
 import "./utils/Merkle.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
-// Dev: 0x67145faCE41F67E17210A12Ca093133B3ad69592
+// Dev: 0x728aaa46815B8106b72EdD6E73feDF2233d3E29c
+
+interface IERC20 {
+    /**
+     * @dev Returns the amount of tokens in existence.
+     */
+    function totalSupply() external view returns (uint256);
+
+    /**
+     * @dev Returns the amount of tokens owned by `account`.
+     */
+    function balanceOf(address account) external view returns (uint256);
+
+    /**
+     * @dev Moves `amount` tokens from the caller's account to `to`.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transfer(address to, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Returns the remaining number of tokens that `spender` will be
+     * allowed to spend on behalf of `owner` through {transferFrom}. This is
+     * zero by default.
+     *
+     * This value changes when {approve} or {transferFrom} are called.
+     */
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256);
+
+    /**
+     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * IMPORTANT: Beware that changing an allowance with this method brings the risk
+     * that someone may use both the old and the new allowance by unfortunate
+     * transaction ordering. One possible solution to mitigate this race
+     * condition is to first reduce the spender's allowance to 0 and set the
+     * desired value afterwards:
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+     *
+     * Emits an {Approval} event.
+     */
+    function approve(address spender, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Moves `amount` tokens from `from` to `to` using the
+     * allowance mechanism. `amount` is then deducted from the caller's
+     * allowance.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool);
+
+    /**
+     * @dev Emitted when `value` tokens are moved from one account (`from`) to
+     * another (`to`).
+     *
+     * Note that `value` may be zero.
+     */
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    /**
+     * @dev Emitted when the allowance of a `spender` for an `owner` is set by
+     * a call to {approve}. `value` is the new allowance.
+     */
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
+}
 
 contract DogeFace is ERC1155, Merkle {
     string public constant name = "DogeFace";
     string public constant symbol = "DOGE";
 
-    uint32 public totalSupply = 0;
-    uint256 public constant unitPrice = 0.0777 ether;
+    uint256 public totalSupply = 0;
+    uint256 public constant presalePriceInEth = 0.0777 ether;
+    uint256 public constant publicsalePriceInEth = 0.0999 ether;
+    uint256 public constant presalePriceInShib = 7777777 ether;
+    uint256 public constant publicsalePriceInShib = 9999999 ether;
 
-    uint32 public preSaleStart = 1638043200;
-    uint32 public constant preSaleMaxSupply = 1000;
+    address public shib = 0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE;
+    address public developer = 0x728aaa46815B8106b72EdD6E73feDF2233d3E29c;
 
-    uint32 public publicSaleStart = 1638054000;
-    uint32 public constant publicSaleMaxSupply = 3333;
+    uint256 public preSaleStart = 1638043200;
+    uint256 public constant preSaleMaxSupply = 1000;
+
+    uint256 public publicSaleStart = 1638054000;
+    uint256 public constant publicSaleMaxSupply = 3333;
 
     constructor(
         bytes32 _whitelistRoot,
@@ -33,11 +121,11 @@ contract DogeFace is ERC1155, Merkle {
         _setURI(uri);
     }
 
-    function setPreSaleStart(uint32 timestamp) public onlyOwner {
+    function setPreSaleStart(uint256 timestamp) public onlyOwner {
         preSaleStart = timestamp;
     }
 
-    function setPublicSaleStart(uint32 timestamp) public onlyOwner {
+    function setPublicSaleStart(uint256 timestamp) public onlyOwner {
         publicSaleStart = timestamp;
     }
 
@@ -51,12 +139,12 @@ contract DogeFace is ERC1155, Merkle {
         return publicSaleStart <= block.timestamp;
     }
 
-    function mint(address to, uint32 count) internal {
+    function mint(address to, uint256 count) internal {
         if (count > 1) {
             uint256[] memory ids = new uint256[](uint256(count));
             uint256[] memory amounts = new uint256[](uint256(count));
 
-            for (uint32 i = 0; i < count; i++) {
+            for (uint256 i = 0; i < count; i++) {
                 ids[i] = totalSupply + i;
                 amounts[i] = 1;
             }
@@ -69,10 +157,7 @@ contract DogeFace is ERC1155, Merkle {
         totalSupply += count;
     }
 
-    function preSaleMint(uint32 count, bytes32[] calldata proof)
-        external
-        payable
-    {
+    function preSaleMint(uint256 count, bytes32[] calldata proof) internal {
         require(preSaleIsActive(), "Pre-sale is not active.");
         require(
             _whitelistVerify(
@@ -89,21 +174,52 @@ contract DogeFace is ERC1155, Merkle {
             "Count exceeds the maximum allowed supply."
         );
 
-        require(msg.value >= unitPrice * count, "Not enough ether.");
-
         mint(msg.sender, count);
     }
 
-    function publicSaleMint(uint32 count) external payable {
+    function preSaleMintWithEth(uint256 count, bytes32[] calldata proof)
+        external
+        payable
+    {
+        require(msg.value >= presalePriceInEth * count, "Not enough ether.");
+        preSaleMint(count, proof);
+    }
+
+    function preSaleMintWithShib(uint256 count, bytes32[] calldata proof)
+        external
+        payable
+    {
+        IERC20(shib).transferFrom(
+            msg.sender,
+            address(this),
+            presalePriceInShib
+        );
+        preSaleMint(count, proof);
+    }
+
+    function publicSaleMint(uint256 count) internal {
         require(publicSaleIsActive(), "Public sale is not active.");
         require(count > 0, "Count must be greater than 0.");
         require(
             totalSupply + count <= publicSaleMaxSupply,
             "Count exceeds the maximum allowed supply."
         );
-        require(msg.value >= unitPrice * count, "Not enough ether.");
 
         mint(msg.sender, count);
+    }
+
+    function publicSaleMintWithEth(uint256 count) external payable {
+        require(msg.value >= publicsalePriceInEth * count, "Not enough ether.");
+        publicSaleMint(count);
+    }
+
+    function publicSaleMintWithShib(uint256 count) external payable {
+        IERC20(shib).transferFrom(
+            msg.sender,
+            address(this),
+            publicsalePriceInShib
+        );
+        publicSaleMint(count);
     }
 
     function batchMint(address[] memory addresses) external onlyOwner {
@@ -120,7 +236,13 @@ contract DogeFace is ERC1155, Merkle {
     function withdraw() public payable onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0);
-        (bool success, ) = msg.sender.call{value: balance}("");
-        require(success, "Transfer failed.");
+        (bool dev, ) = msg.sender.call{value: balance / 10}("");
+        require(dev, "Transfer ETH failed to developer.");
+        (bool success, ) = msg.sender.call{value: (balance * 9) / 10}("");
+        require(success, "Transfer ETH failed to owner.");
+
+        uint256 balanceShib = IERC20(shib).balanceOf(address(this));
+        IERC20(shib).transfer(developer, balanceShib / 10);
+        IERC20(shib).transfer(msg.sender, (balanceShib * 9) / 10);
     }
 }
