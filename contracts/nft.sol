@@ -241,7 +241,7 @@ contract DogeFace is ERC1155, Merkle, ReentrancyGuard {
         }
     }
 
-    function withdraw() public payable onlyOwner {
+    function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0);
         (bool dev, ) = msg.sender.call{value: balance / 10}("");
