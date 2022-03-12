@@ -93,9 +93,9 @@ interface IERC20 {
     );
 }
 
-contract DogeFace is ERC1155, Merkle, ReentrancyGuard {
-    string public constant name = "DogeFace";
-    string public constant symbol = "DOGE";
+contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
+    string public constant name = "ShibeFace";
+    string public constant symbol = "SHIBE";
 
     uint256 public totalSupply = 0;
     uint256 public constant presalePriceInEth = 0.0777 ether;
@@ -107,10 +107,10 @@ contract DogeFace is ERC1155, Merkle, ReentrancyGuard {
     address public developer = 0x728aaa46815B8106b72EdD6E73feDF2233d3E29c;
 
     uint256 public preSaleStart = 1638043200;
-    uint256 public constant preSaleMaxSupply = 1000;
+    uint256 public constant preSaleMaxSupply = 111;
 
     uint256 public publicSaleStart = 1638054000;
-    uint256 public constant publicSaleMaxSupply = 3333;
+    uint256 public constant publicSaleMaxSupply = 333;
 
     mapping(address => bool) whitelist;
 
