@@ -7,7 +7,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     from: deployer,
     log: true,
     args: [
-      "0xbcef84a3b38d1f4dad329532950aef851e42d982ab87d00b11cc8e241d61d074",
+      "0xa3fa8ecd3a22b3596a752b0c3984fe21c62aa4c8bb4bba2006ef049fb209d429",
       "https://ipfs.io/ipfs/QmQtN81i9eNrD3wxcr67scDpLvZDDXxbmAvNXMaZh3D6tB/",
     ],
   });
