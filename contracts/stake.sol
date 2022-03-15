@@ -117,10 +117,6 @@ contract Skrll is IERC1155Receiver, ERC20Burnable, Ownable {
         _mint(msg.sender, totalRewards > remaining ? remaining : totalRewards);
     }
 
-    function burn(address from, uint256 amount) external onlyOwner {
-        _burn(from, amount);
-    }
-
     function toggle() external onlyOwner {
         live = !live;
     }

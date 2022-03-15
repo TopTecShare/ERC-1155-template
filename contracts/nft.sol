@@ -114,6 +114,8 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
 
     mapping(address => bool) whitelist;
 
+    event CreateShib(address indexed from, uint256 tokenId);
+
     constructor(bytes32 _whitelistRoot, string memory uri)
         Merkle(_whitelistRoot)
         ERC1155(uri)
@@ -156,8 +158,13 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
             }
 
             _mintBatch(to, ids, amounts, "");
+
+            for (uint256 i = 0; i < count; i++) {
+                emit CreateShib(to, totalSupply + i);
+            }
         } else {
             _mint(to, totalSupply, 1, "");
+            emit CreateShib(to, totalSupply);
         }
 
         totalSupply += count;
