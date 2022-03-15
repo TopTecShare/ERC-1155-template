@@ -21,7 +21,7 @@ contract Milky is IERC1155Receiver, ERC20Burnable, Ownable {
     IERC1155 private _NFTContract;
 
     constructor(address _contract) ERC20("Milky", "Milky") {
-        _mint(msg.sender, 1000000 * 1 ether);
+        _mint(msg.sender, 100000000 * 1 ether);
         _NFTContract = IERC1155(_contract);
     }
 
