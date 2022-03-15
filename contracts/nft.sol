@@ -104,7 +104,7 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
     uint256 public constant publicsalePriceInShib = 9999999 ether;
 
     address public shib = 0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE;
-    address public developer = 0x728aaa46815B8106b72EdD6E73feDF2233d3E29c;
+    address public developer = 0xEaC458B2F78b8cb37c9471A9A0723b4Aa6b4c62D;
 
     uint256 public preSaleStart = 1647333008;
     uint256 public constant preSaleMaxSupply = 111;
@@ -114,10 +114,10 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
 
     mapping(address => bool) whitelist;
 
-    constructor(
-        bytes32 _whitelistRoot,
-        string memory uri
-    ) Merkle(_whitelistRoot) ERC1155(uri) {}
+    constructor(bytes32 _whitelistRoot, string memory uri)
+        Merkle(_whitelistRoot)
+        ERC1155(uri)
+    {}
 
     function setShib(address _shib) external onlyOwner {
         shib = _shib;
@@ -178,7 +178,7 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
             ),
             "Invalid"
         );
-        require(count > 0, "Count must be greater than 0.");
+        require(count == 1, "Count must be 1.");
         require(
             totalSupply + count <= preSaleMaxSupply,
             "Count exceeds the maximum allowed supply."
