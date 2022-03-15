@@ -168,6 +168,7 @@ contract Skrll is IERC1155Receiver, ERC20Burnable, Ownable {
     function supportsInterface(bytes4 interfaceId)
         external
         pure
+        override
         returns (bool)
     {
         return interfaceId == type(IERC1155).interfaceId;
