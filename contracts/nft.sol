@@ -163,10 +163,7 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
         totalSupply += count;
     }
 
-    function preSaleMint(uint256 count, bytes32[] calldata proof)
-        internal
-        nonReentrant
-    {
+    function preSaleMint(bytes32[] calldata proof) internal nonReentrant {
         require(preSaleIsActive(), "Pre-sale is not active.");
         require(!whitelist[msg.sender], "Already claimed.");
         require(
@@ -178,34 +175,27 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
             ),
             "Invalid"
         );
-        require(count == 1, "Count must be 1.");
         require(
-            totalSupply + count <= preSaleMaxSupply,
+            totalSupply < preSaleMaxSupply,
             "Count exceeds the maximum allowed supply."
         );
 
-        mint(msg.sender, count);
+        mint(msg.sender, 1);
         whitelist[msg.sender] = true;
     }
 
-    function preSaleMintWithEth(uint256 count, bytes32[] calldata proof)
-        external
-        payable
-    {
-        require(msg.value >= presalePriceInEth * count, "Not enough ether.");
-        preSaleMint(count, proof);
+    function preSaleMintWithEth(bytes32[] calldata proof) external payable {
+        require(msg.value >= presalePriceInEth, "Not enough ether.");
+        preSaleMint(proof);
     }
 
-    function preSaleMintWithShib(uint256 count, bytes32[] calldata proof)
-        external
-        payable
-    {
+    function preSaleMintWithShib(bytes32[] calldata proof) external payable {
         IERC20(shib).transferFrom(
             msg.sender,
             address(this),
             presalePriceInShib
         );
-        preSaleMint(count, proof);
+        preSaleMint(proof);
     }
 
     function publicSaleMint(uint256 count) internal {
