@@ -3,7 +3,7 @@
  */
 
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "./utils/Merkle.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
