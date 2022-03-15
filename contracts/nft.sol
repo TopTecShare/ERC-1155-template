@@ -103,13 +103,14 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
     uint256 public constant presalePriceInShib = 7777777 ether;
     uint256 public constant publicsalePriceInShib = 9999999 ether;
 
+    // address public shib = 0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE;
     address public shib = 0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE;
     address public developer = 0x728aaa46815B8106b72EdD6E73feDF2233d3E29c;
 
-    uint256 public preSaleStart = 1638043200;
+    uint256 public preSaleStart = 1647333008;
     uint256 public constant preSaleMaxSupply = 111;
 
-    uint256 public publicSaleStart = 1638054000;
+    uint256 public publicSaleStart = 1657333008;
     uint256 public constant publicSaleMaxSupply = 333;
 
     mapping(address => bool) whitelist;
@@ -244,7 +245,7 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
     function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0);
-        (bool dev, ) = msg.sender.call{value: balance / 10}("");
+        (bool dev, ) = developer.call{value: balance / 10}("");
         require(dev, "Transfer ETH failed to developer.");
         (bool success, ) = msg.sender.call{value: (balance * 9) / 10}("");
         require(success, "Transfer ETH failed to owner.");
