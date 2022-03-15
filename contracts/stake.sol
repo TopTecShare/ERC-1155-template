@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 pragma solidity ^0.8.4;
 
-contract Milky is IERC1155Receiver, ERC20Burnable, Ownable {
+contract Skrll is IERC1155Receiver, ERC20Burnable, Ownable {
     uint256 public constant MAX_SUPPLY = 200000000 * 1 ether;
     address public constant NFT_ADDRESS =
         0x728aaa46815B8106b72EdD6E73feDF2233d3E29c;
@@ -20,7 +20,7 @@ contract Milky is IERC1155Receiver, ERC20Burnable, Ownable {
 
     IERC1155 private _NFTContract;
 
-    constructor(address _contract) ERC20("Milky", "Milky") {
+    constructor(address _contract) ERC20("Skrll", "Skrll") {
         _mint(msg.sender, 100000000 * 1 ether);
         _NFTContract = IERC1155(_contract);
     }

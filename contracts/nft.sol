@@ -120,6 +120,10 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
         string memory uri
     ) Merkle(_whitelistRoot, _freeClaimRoot) ERC1155(uri) {}
 
+    function setShib(address _shib) external onlyOwner {
+        shib = _shib;
+    }
+
     function setURI(string memory uri) public onlyOwner {
         _setURI(uri);
     }
