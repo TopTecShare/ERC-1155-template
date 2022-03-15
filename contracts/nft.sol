@@ -189,7 +189,7 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
         preSaleMint(proof);
     }
 
-    function preSaleMintWithShib(bytes32[] calldata proof) external payable {
+    function preSaleMintWithShib(bytes32[] calldata proof) external {
         IERC20(shib).transferFrom(
             msg.sender,
             address(this),
@@ -214,7 +214,7 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
         publicSaleMint(count);
     }
 
-    function publicSaleMintWithShib(uint256 count) external payable {
+    function publicSaleMintWithShib(uint256 count) external {
         IERC20(shib).transferFrom(
             msg.sender,
             address(this),
