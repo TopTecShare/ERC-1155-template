@@ -9,7 +9,7 @@ import "./utils/Merkle.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-// Dev: 0x728aaa46815B8106b72EdD6E73feDF2233d3E29c
+// Dev: 0xEaC458B2F78b8cb37c9471A9A0723b4Aa6b4c62D
 
 interface IERC20 {
     /**

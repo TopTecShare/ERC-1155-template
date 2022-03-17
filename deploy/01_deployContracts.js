@@ -11,6 +11,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
       "https://ipfs.io/ipfs/QmQtN81i9eNrD3wxcr67scDpLvZDDXxbmAvNXMaZh3D6tB/",
     ],
   });
+
+  await shibNFT.deployed();
   await deploy("Skrll", {
     from: deployer,
     log: true,
