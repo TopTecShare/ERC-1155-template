@@ -148,7 +148,7 @@ contract Skrll is IERC1155Receiver, ERC20Burnable, Ownable {
         uint256,
         bytes calldata
     ) external pure override returns (bytes4) {
-        return this.onERC1155BatchReceived.selector;
+        return this.onERC1155Received.selector;
     }
 
     function onERC1155BatchReceived(

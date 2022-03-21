@@ -123,7 +123,24 @@ describe("ShibeFace", function () {
   });
 
   describe("Staking", function () {
-    xit("Should", async function () {});
+    it("Should receiver ERC1155 token", async function () {
+      await hardhatToken.setPublicSaleStart(1000000000);
+      let totalsupply = await hardhatToken.totalSupply();
+      await expect(
+        hardhatToken.publicSaleMintWithEth(2, {
+          value: utils.parseEther("0.1998"),
+        })
+      )
+        .to.emit(hardhatToken, "CreateShib")
+        .withArgs(owner.address, totalsupply);
+      await hardhatToken.safeTransferFrom(
+        owner.address,
+        hardhatStake.address,
+        0,
+        1,
+        "0x00"
+      );
+    });
 
     xit("Should", async function () {});
   });
