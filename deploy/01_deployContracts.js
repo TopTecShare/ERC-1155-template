@@ -13,10 +13,10 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   });
 
   await shibNFT.deployed();
-  await deploy("Skrll", {
-    from: deployer,
-    log: true,
-    args: [shibNFT.address],
-  });
+  // await deploy("Skrll", {
+  //   from: deployer,
+  //   log: true,
+  //   args: [shibNFT.address],
+  // });
 };
 module.exports.tags = ["all", "ShibeFace"];

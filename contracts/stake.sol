@@ -4,14 +4,14 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// dev address: 0x728aaa46815B8106b72EdD6E73feDF2233d3E29c
+// dev address: 0x01CB52008400316898535ef77d2844746Fdd90e5
 
 pragma solidity ^0.8.4;
 
 contract Skrll is IERC1155Receiver, ERC20Burnable, Ownable {
     uint256 public constant MAX_SUPPLY = 200000000 * 1 ether;
     address public constant NFT_ADDRESS =
-        0x728aaa46815B8106b72EdD6E73feDF2233d3E29c;
+        0x01CB52008400316898535ef77d2844746Fdd90e5;
     bool public live = false;
 
     mapping(uint256 => uint256) internal NFTTimeStaked;

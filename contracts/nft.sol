@@ -8,8 +8,9 @@ pragma solidity ^0.8.4;
 import "./utils/Merkle.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-// Dev: 0xEaC458B2F78b8cb37c9471A9A0723b4Aa6b4c62D
+// Dev: 0x01CB52008400316898535ef77d2844746Fdd90e5
 
 interface IERC20 {
     /**
@@ -94,17 +95,21 @@ interface IERC20 {
 }
 
 contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
+    using SafeMath for uint256;
+
     string public constant name = "ShibeFace";
     string public constant symbol = "SHIBE";
 
     uint256 public totalSupply = 0;
+    uint256 public constant presalePerWallet = 2;
+    uint256 public constant publicsalePerWallet = 12;
     uint256 public constant presalePriceInEth = 0.0777 ether;
     uint256 public constant publicsalePriceInEth = 0.0999 ether;
-    uint256 public constant presalePriceInShib = 7777777 ether;
-    uint256 public constant publicsalePriceInShib = 9999999 ether;
+    uint256 public presalePriceInShib = 7777777 ether;
+    uint256 public publicsalePriceInShib = 9999999 ether;
 
     address public shib = 0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE;
-    address public developer = 0x2831BC51569A2a606609CC6162Af3147C6c37193;
+    address public developer = 0x01CB52008400316898535ef77d2844746Fdd90e5;
 
     uint256 public preSaleStart = 1647333008;
     uint256 public constant preSaleMaxSupply = 111;
@@ -112,7 +117,8 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
     uint256 public publicSaleStart = 1657333008;
     uint256 public constant publicSaleMaxSupply = 333;
 
-    mapping(address => bool) whitelist;
+    mapping(address => uint256) whitelist;
+    mapping(address => uint256) publiclist;
 
     event CreateShib(address indexed from, uint256 tokenId);
 
@@ -170,9 +176,15 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
         totalSupply += count;
     }
 
-    function preSaleMint(bytes32[] calldata proof) internal nonReentrant {
+    function preSaleMint(uint256 count, bytes32[] calldata proof)
+        internal
+        nonReentrant
+    {
         require(preSaleIsActive(), "Pre-sale is not active.");
-        require(!whitelist[msg.sender], "Already claimed.");
+        require(
+            whitelist[msg.sender] + count <= presalePerWallet,
+            "Can not exceed amount per wallet in presale."
+        );
         require(
             _whitelistVerify(
                 _whitelistLeaf(
@@ -187,37 +199,50 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
             "Count exceeds the maximum allowed supply."
         );
 
-        mint(msg.sender, 1);
-        whitelist[msg.sender] = true;
+        mint(msg.sender, count);
+        whitelist[msg.sender] += count;
     }
 
-    function preSaleMintWithEth(bytes32[] calldata proof) external payable {
-        require(msg.value >= presalePriceInEth, "Not enough ether.");
-        preSaleMint(proof);
+    function preSaleMintWithEth(uint256 count, bytes32[] calldata proof)
+        external
+        payable
+    {
+        require(msg.value >= presalePriceInEth.mul(count), "Not enough ether.");
+        preSaleMint(count, proof);
     }
 
-    function preSaleMintWithShib(bytes32[] calldata proof) external {
+    function preSaleMintWithShib(uint256 count, bytes32[] calldata proof)
+        external
+    {
         IERC20(shib).transferFrom(
             msg.sender,
             address(this),
-            presalePriceInShib
+            presalePriceInShib.mul(count)
         );
-        preSaleMint(proof);
+        preSaleMint(count, proof);
     }
 
-    function publicSaleMint(uint256 count) internal {
+    function publicSaleMint(uint256 count) internal nonReentrant {
         require(publicSaleIsActive(), "Public sale is not active.");
         require(count > 0, "Count must be greater than 0.");
+        require(
+            publiclist[msg.sender] + count <= publicsalePerWallet,
+            "Can not exceed amount per wallet in public sale."
+        );
         require(
             totalSupply + count <= publicSaleMaxSupply,
             "Count exceeds the maximum allowed supply."
         );
 
         mint(msg.sender, count);
+        publiclist[msg.sender] += count;
     }
 
     function publicSaleMintWithEth(uint256 count) external payable {
-        require(msg.value >= publicsalePriceInEth * count, "Not enough ether.");
+        require(
+            msg.value >= publicsalePriceInEth.mul(count),
+            "Not enough ether."
+        );
         publicSaleMint(count);
     }
 
@@ -225,9 +250,17 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
         IERC20(shib).transferFrom(
             msg.sender,
             address(this),
-            publicsalePriceInShib
+            publicsalePriceInShib.mul(count)
         );
         publicSaleMint(count);
+    }
+
+    function setPresaleShibPrice(uint256 price) external onlyOwner {
+        presalePriceInShib = price;
+    }
+
+    function setPublicsaleShibPrice(uint256 price) external onlyOwner {
+        publicsalePriceInShib = price;
     }
 
     function batchMint(address[] memory addresses) external onlyOwner {
