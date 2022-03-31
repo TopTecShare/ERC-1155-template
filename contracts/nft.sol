@@ -104,7 +104,7 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
     uint256 public constant publicsalePriceInShib = 9999999 ether;
 
     address public shib = 0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE;
-    address public developer = 0xEaC458B2F78b8cb37c9471A9A0723b4Aa6b4c62D;
+    address public developer = 0x2831BC51569A2a606609CC6162Af3147C6c37193;
 
     uint256 public preSaleStart = 1647333008;
     uint256 public constant preSaleMaxSupply = 111;
