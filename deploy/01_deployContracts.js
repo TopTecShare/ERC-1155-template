@@ -12,7 +12,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     ],
   });
 
-  await shibNFT.deployed();
+  // await shibNFT.deployed();
   await deploy("Skrll", {
     from: deployer,
     log: true,

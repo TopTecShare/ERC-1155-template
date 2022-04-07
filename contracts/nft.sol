@@ -115,7 +115,7 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
     uint256 public constant preSaleMaxSupply = 111;
 
     uint256 public publicSaleStart = 1657333008;
-    uint256 public constant publicSaleMaxSupply = 333;
+    uint256 public constant publicSaleMaxSupply = 444;
 
     mapping(address => uint256) whitelist;
     mapping(address => uint256) publiclist;
