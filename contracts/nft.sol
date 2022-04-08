@@ -192,7 +192,7 @@ contract ShibeFace is ERC1155, Merkle, ReentrancyGuard {
                 ),
                 proof
             ),
-            "Invalid"
+            "You are not whitelisted."
         );
         require(
             totalSupply < preSaleMaxSupply,
